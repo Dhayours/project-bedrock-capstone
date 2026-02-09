@@ -36,7 +36,6 @@ variable "lambda_name" {
 variable "cluster_name" {
   description = "EKS cluster name"
   type        = string
-  default     = "bedrock-eks"
 }
 
 variable "eks_version" {

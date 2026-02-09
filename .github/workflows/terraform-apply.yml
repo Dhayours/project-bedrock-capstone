@@ -35,4 +35,7 @@ jobs:
         run: terraform init -input=false
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false -var="student_id=${{ secrets.STUDENT_ID }}"
+        run: |
+          terraform apply -auto-approve -input=false \
+            -var="student_id=${{ secrets.STUDENT_ID }}" \
+            -var="cluster_name=project-bedrock-cluster"
