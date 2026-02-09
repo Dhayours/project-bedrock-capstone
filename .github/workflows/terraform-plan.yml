@@ -41,4 +41,9 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -input=false -var="student_id=${{ secrets.STUDENT_ID }}"
+        run: |
+          terraform plan -input=false \
+            -var-file=terraform.tfvars \
+            -var="student_id=${{ secrets.STUDENT_ID }}" \
+            -var="cluster_name=project-bedrock-cluster"
+        
