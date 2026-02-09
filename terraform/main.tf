@@ -17,7 +17,8 @@ resource "aws_vpc" "bedrock" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = var.vpc_name_tag
+    Name    = "project-bedrock-vpc"
+    Project = "barakat-2025-capstone"
   }
 }
 
