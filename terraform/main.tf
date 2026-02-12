@@ -3,8 +3,7 @@ data "aws_availability_zones" "available" {
 }
 
 locals {
-  azs = slice(data.aws_availability_zones.available.names, 0, 2)
-
+  azs                = slice(data.aws_availability_zones.available.names, 0, 2)
   assets_bucket_name = "${var.assets_bucket_prefix}-${var.student_id}"
 }
 
@@ -17,8 +16,7 @@ resource "aws_vpc" "bedrock" {
   enable_dns_hostnames = true
 
   tags = {
-    Name    = "project-bedrock-vpc"
-    Project = "barakat-2025-capstone"
+    Name = "project-bedrock-vpc"
   }
 }
 
@@ -33,8 +31,12 @@ resource "aws_subnet" "public" {
   availability_zone       = local.azs[count.index]
   map_public_ip_on_launch = true
 
+  # ✅ CRITICAL: keep EKS/ALB subnet discovery tags
   tags = {
     Name = "bedrock-public-${count.index}"
+
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                    = "1"
   }
 }
 
@@ -44,8 +46,12 @@ resource "aws_subnet" "private" {
   cidr_block        = cidrsubnet(aws_vpc.bedrock.cidr_block, 8, count.index + 10)
   availability_zone = local.azs[count.index]
 
+  # ✅ CRITICAL: keep EKS/ALB subnet discovery tags
   tags = {
     Name = "bedrock-private-${count.index}"
+
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"           = "1"
   }
 }
 
@@ -145,6 +151,12 @@ resource "aws_iam_role_policy_attachment" "node_ECR_ReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+# ✅ Needed for CloudWatch Observability add-on to ship logs/metrics via nodes
+resource "aws_iam_role_policy_attachment" "node_CloudWatchAgentServerPolicy" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
 # -------------------------
 # EKS Cluster
 # -------------------------
@@ -160,8 +172,6 @@ resource "aws_eks_cluster" "bedrock" {
   vpc_config {
     subnet_ids = concat(aws_subnet.public[*].id, aws_subnet.private[*].id)
   }
-
-
 
   enabled_cluster_log_types = [
     "api",
@@ -193,7 +203,8 @@ resource "aws_eks_node_group" "default" {
   depends_on = [
     aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.node_ECR_ReadOnly
+    aws_iam_role_policy_attachment.node_ECR_ReadOnly,
+    aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy
   ]
 }
 
@@ -203,8 +214,7 @@ resource "aws_eks_node_group" "default" {
 resource "aws_eks_addon" "cloudwatch_observability" {
   cluster_name = aws_eks_cluster.bedrock.name
   addon_name   = "amazon-cloudwatch-observability"
-
-  depends_on = [aws_eks_node_group.default]
+  depends_on   = [aws_eks_node_group.default]
 }
 
 # -------------------------
@@ -219,29 +229,11 @@ resource "aws_iam_user_policy_attachment" "dev_readonly" {
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
-resource "aws_iam_access_key" "dev_view_key" {
-  user = aws_iam_user.dev_view.name
-}
-
-# EKS access entry (so user can kubectl get but not delete)
 resource "aws_eks_access_entry" "dev_view" {
   cluster_name  = aws_eks_cluster.bedrock.name
   principal_arn = aws_iam_user.dev_view.arn
   type          = "STANDARD"
 }
-/*
-resource "aws_eks_access_policy_association" "dev_view_policy" {
-  cluster_name  = aws_eks_cluster.bedrock.name
-  principal_arn = aws_iam_user.dev_view.arn
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-
-  access_scope {
-    type = "cluster"
-  }
-
-  depends_on = [aws_eks_access_entry.dev_view]
-}
-*/
 
 # -------------------------
 # S3 + Lambda (event driven)
