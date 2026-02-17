@@ -2,7 +2,7 @@ name: terraform-apply
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "test-cicd" ]
 
 permissions:
   contents: read
