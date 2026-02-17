@@ -1,0 +1,25 @@
+apiVersion: v1
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::842833233945:role/eksctl-project-bedrock-cluster-nod-NodeInstanceRole-IDFpLEvt9igU
+      groups:
+      - system:bootstrappers
+      - system:nodes
+      username: system:node:{{EC2PrivateDNSName}}
+    - rolearn: arn:aws:iam::842833233945:role/eksctl-project-bedrock-cluster-nod-NodeInstanceRole-8I2ByWQy6AS4
+      groups:
+      - system:bootstrappers
+      - system:nodes
+      username: system:node:{{EC2PrivateDNSName}}
+  mapUsers: |
+    - userarn: arn:aws:iam::842833233945:user/bedrock-dev-view
+      username: bedrock-dev-view
+      groups:
+        - bedrock-view
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2026-02-16T00:44:32Z"
+  name: aws-auth
+  namespace: kube-system
+  resourceVersion: "145863"
+  uid: aa51254c-579a-4a6f-bc79-a2cb5da7ea83

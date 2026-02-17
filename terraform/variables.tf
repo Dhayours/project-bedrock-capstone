@@ -19,6 +19,7 @@ variable "eks_version" {
 variable "student_id" {
   description = "Student ID used for unique naming (e.g., S3 bucket suffix)"
   type        = string
+  default     = "0960"
 }
 
 variable "assets_bucket_prefix" {
