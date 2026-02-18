@@ -3,7 +3,8 @@
 # S3 bucket (private)
 ############################################
 resource "aws_s3_bucket" "assets" {
-  bucket = local.assets_bucket_name
+  bucket        = local.assets_bucket_name
+  force_destroy = true
 
   tags = {
     Project = "barakat-2025-capstone"
