@@ -5,6 +5,7 @@ on:
     branches: [ "test-cicd" ]
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -27,7 +28,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::842833233945:role/<your-github-oidc-role-name>
+          role-to-assume: arn:aws:iam::842833233945:role/bedrock-github-actions-role
           aws-region: us-east-1
 
       - name: Terraform Init
