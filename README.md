@@ -2,7 +2,7 @@ Project Bedrock
 
 Barakat Third Semester Capstone – InnovateMart EKS Deployment
 
-Cloud DevOps Engineer: Chukwuka Agupugo
+Cloud DevOps Engineer: Amoto David Yusuf
 AWS Region: us-east-1
 
 📌 Overview
@@ -35,7 +35,7 @@ EKS Cluster: project-bedrock-cluster
 
 Namespace: retail-app
 
-S3 Bucket: bedrock-assets-chukwuka-1021
+S3 Bucket: bedrock-assets-0960
 
 Lambda: bedrock-asset-processor
 
@@ -52,7 +52,7 @@ Remote State Configuration
 
 Terraform backend:
 
-S3 bucket: bedrock-tfstate-chukwuka-1021
+S3 bucket: bedrock-tfstate-0960
 
 DynamoDB table: Used for state locking
 
@@ -118,7 +118,7 @@ s3:PutObject
 
 on:
 
-bedrock-assets-chukwuka-1021
+bedrock-assets-0960
 
 Kubernetes RBAC
 
@@ -152,7 +152,7 @@ Application logs available under:
 
 S3 Bucket:
 
-bedrock-assets-chukwuka-1021
+bedrock-assets-0960
 
 
 Lambda Function:
@@ -177,7 +177,7 @@ is logged in:
 Test:
 
 echo "test" > test.txt
-aws s3 cp test.txt s3://bedrock-assets-chukwuka-1021/test.txt
+aws s3 cp test.txt s3://bedrock-assets-0960/test.txt
 
 🔄 CI/CD Automation
 
